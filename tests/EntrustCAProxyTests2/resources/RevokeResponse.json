@@ -1,0 +1,13 @@
+﻿{
+  "type": "ActionResponse",
+  "action": {
+    "type": "RevokeAction",
+    "id": "cf5de456-7c51-42a6-9446-0030e655e376",
+    "properties": {},
+    "comment": "Revoke Test",
+    "status": "COMPLETED",
+    "succeedIfAlreadyInRequestedState": true,
+    "reason": "unspecified",
+    "compromiseDate": "2021-04-30T19:07:07.826511Z"
+  }
+}
