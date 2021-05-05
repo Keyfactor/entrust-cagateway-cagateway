@@ -8,10 +8,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8FE7D9AF-E63E-486D-8BD6-92B400506948}"
 	ProjectSection(SolutionItems) = preProject
 		LICENSE = LICENSE
-		README.MD.tpl = README.MD.tpl
+		README.md.tpl = README.md.tpl
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntrustCAProxyTests2", "tests\EntrustCAProxyTests2\EntrustCAProxyTests2.csproj", "{2E2E9F60-D734-4383-9911-E4D945A8FB6C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntrustCAProxyTests", "tests\EntrustCAProxyTests2\EntrustCAProxyTests.csproj", "{2E2E9F60-D734-4383-9911-E4D945A8FB6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

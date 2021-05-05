@@ -21,12 +21,11 @@ namespace Keyfactor.AnyGateway.Entrust.Client
         public EnrollRequest(string caId, string csr, string subject, ProfileResponse certificateProfile) :
             base("POST")
         {
-
+            this.CAId = caId;
             this.csr = csr;
-            this.requiredFormat = new Api.Requiredformat { format = "PEM" };
+            this.requiredFormat = new Api.Requiredformat { format = "X509" };
             profileId = certificateProfile.Profile.id;
             subjectVariables = ParseSubjectVaraiables(subject, certificateProfile);
-
             //includeCa = true;
             //properties= new Properties() { property1="",property2="" }; //pull from the template config
             //subjectAltNames = new Subjectaltname[] { new Subjectaltname() {type= "dNSName",value="testenroll1.keyfactor.lab" }, new Subjectaltname() { type = "dNSName", value = "oldfashionedenroll.cocktail.lab" } }
@@ -34,8 +33,9 @@ namespace Keyfactor.AnyGateway.Entrust.Client
             //optionalCertificateRequestDetails = new Optionalcertificaterequestdetails {
             //    validityPeriod="",//lifetime of the cert P1Y3M10DT0H0M
             //    subjectDn ="" //complete subject. not clear if this will override the subject variables above?
+
+            this.tracking = new Tracking();
         }
-        
         public string CAId { get; set; }
 
         [JsonProperty("profileId")]
@@ -44,18 +44,23 @@ namespace Keyfactor.AnyGateway.Entrust.Client
         public Requiredformat requiredFormat { get; set; }
         [JsonProperty("subjectVariables")]
         public Subjectvariable[] subjectVariables { get; set; }
-        [JsonProperty("subjectAltNames")]
+        [JsonProperty("subjectAltNames", NullValueHandling = NullValueHandling.Ignore)]
         public Subjectaltname[] subjectAltNames { get; set; }
         [JsonProperty("previousSubjectDn", NullValueHandling = NullValueHandling.Ignore)]
         public string previousSubjectDn { get; set; }
         [JsonProperty("properties", NullValueHandling = NullValueHandling.Ignore)]
-        public Properties properties { get; set; }
+        public Dictionary<string,string> properties { get; set; }
         [JsonProperty("csr")]
         public string csr { get; set; }
         [JsonProperty("includeCa",DefaultValueHandling=DefaultValueHandling.Populate)]
         public bool includeCa { get; set; }
         [JsonProperty("optionalCertificateRequestDetails", NullValueHandling = NullValueHandling.Ignore)]
         public Optionalcertificaterequestdetails optionalCertificateRequestDetails { get; set; }
+        public Tracking tracking { get; set; }
+        public Dictionary<string, string> GetTrackingDetailsForGateway()
+        {
+            return JsonConvert.DeserializeObject<Dictionary<string, string>>(this.tracking.ToString());
+        }
 
         public string Parameters => throw new NotImplementedException();
 

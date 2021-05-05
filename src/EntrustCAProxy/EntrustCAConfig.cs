@@ -11,7 +11,13 @@ using System.Threading.Tasks;
 namespace Keyfactor.AnyGateway.Entrust
 {
     public class EntrustCAConfig
-    {
+    { 
+        public EntrustCAConfig()
+        {
+            this.TrackingMap = new Dictionary<string, string>();
+        }
+
+        [JsonProperty("ApiEndpoint")]
         public string EntrustEndpoint { get; set; }
         public string CAId { get; set; }
         public ClientCertificate ClientCertificate { get; set; }
@@ -35,6 +41,7 @@ namespace Keyfactor.AnyGateway.Entrust
                 return foundCerts[0];
             } 
         }
+        public Dictionary<string,string> TrackingMap { get; set; }
 
     }
     public class ClientCertificate

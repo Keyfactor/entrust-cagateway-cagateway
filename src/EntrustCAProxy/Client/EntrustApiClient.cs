@@ -37,27 +37,33 @@ namespace Keyfactor.AnyGateway.Entrust.Client
             RestClient = restClient;
         }
 
-        public async Task<T> Request<T>(IApiRequest apiRequest) where T : EntrustBaseResponse
+        public async Task<TResponse> Request<TRequest,TResponse>(IApiRequest apiRequest) where TResponse : EntrustBaseResponse, new()
         {
             HttpResponseMessage response=null;
             switch (apiRequest.Method)
             {
-                case HttpMethod m when m== HttpMethod.Get:
+                case HttpMethod m when m == HttpMethod.Get:
                     response = await RestClient.GetAsync(apiRequest.RequestUrl);
                     break;
                 case HttpMethod m when m == HttpMethod.Post:
-                    response = await RestClient.PostAsJsonAsync(apiRequest.RequestUrl, apiRequest.RequestBody);
+                    response = await RestClient.PostAsJsonAsync(apiRequest.RequestUrl, JsonConvert.DeserializeObject<TRequest>(apiRequest.RequestBody.ToString()));
                     break;
                 default:
                     throw new ArgumentException("Invalid HttpMethod in apiRequest","apiRequest");
             }
 
-            var parsedResponse = JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync());
+            var rawResponse = await response.Content.ReadAsStringAsync();           
+            var parsedResponse = JsonConvert.DeserializeObject<TResponse>(rawResponse);
             parsedResponse.IsSuccess = response.IsSuccessStatusCode;
+            if (!response.IsSuccessStatusCode)
+            { 
+                parsedResponse.ErrorResponse = JsonConvert.DeserializeObject<ErrorResponse>(rawResponse);
+            }
+
             return parsedResponse;
         }
     }
-    public class ErrorResponse : EntrustBaseResponse
+    public class ErrorResponse
     {
         string caMessage { get; set; }
         public EntrustMessage error { get; set; }
@@ -72,10 +78,10 @@ namespace Keyfactor.AnyGateway.Entrust.Client
             ApiCode = "unknown";
             ApiMessage = "uknown error occured. See Internal Exception";
         }
-        public EntrustApiException(ErrorResponse errorResponse) : base(errorResponse.Message.message)
+        public EntrustApiException(EntrustBaseResponse baseResponse) : base(baseResponse.ErrorResponse.error.message)
         {
-            ApiCode = errorResponse.error.code;
-            ApiMessage = errorResponse.error.message;
+            ApiCode = baseResponse.ErrorResponse.error.code;
+            ApiMessage = baseResponse.ErrorResponse.error.message;
         }
     }
 }

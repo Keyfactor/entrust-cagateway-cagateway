@@ -3,18 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Keyfactor.AnyGateway.Entrust.Client
 {
     public class CertificateEventListRequest : EntrustBaseRequest, IApiRequest
     {
+        private string FIELD_FILTER = String.Concat(HttpUtility.UrlEncode("$"),"fields=-events.certificate");
         public DateTime? StartDate { get; set; } = new DateTime(2000, 01, 01);
-        private string StartDateFormatQueryString => String.Format("?startDate={0:yyyy-MM-ddTHH:mm:ss.sssZ}", StartDate);
+        private string StartDateFormatQueryString => String.Format("&startDate={0:yyyy-MM-ddTHH:mm:ss.sssZ}", StartDate);
 
         public string NextPageIndex { get; set; }
-        private string NextPageIndexFormatQueryString => String.Format("?nextPageIndex={0}", NextPageIndex);
+        private string NextPageIndexFormatQueryString => String.Format("&nextPageIndex={0}", NextPageIndex);
 
-        public string Parameters  => String.IsNullOrEmpty(NextPageIndex) ? StartDateFormatQueryString : NextPageIndexFormatQueryString;
+        public string Parameters  => String.Concat(FIELD_FILTER ,(String.IsNullOrEmpty(NextPageIndex) ? StartDateFormatQueryString : NextPageIndexFormatQueryString));
 
         public CertificateEventListRequest():
             base("GET")
@@ -37,6 +39,6 @@ namespace Keyfactor.AnyGateway.Entrust.Client
 
         public string CAId { get; set; }
 
-        public string RequestUrl => $"v1/certificate-authorities/{CAId}/certificate-events{this.Parameters}";
+        public string RequestUrl => $"v1/certificate-authorities/{CAId}/certificate-events?{this.Parameters}";
     }
 }

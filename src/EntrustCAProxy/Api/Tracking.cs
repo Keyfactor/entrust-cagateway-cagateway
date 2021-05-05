@@ -5,31 +5,29 @@ namespace Keyfactor.AnyGateway.Entrust.Api
 {
     public class Tracking
     {
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this);
+        }
         public Tracking()
         {
 
         }
-        [JsonProperty("trackingInfo")]
+
+        [JsonProperty("tracking.trackingInfo")]
         public string TrackingInfo { get; set; }
 
-        [JsonProperty("requesterName")]
+        [JsonProperty("tracking.requesterName")]
         public string RequesterName { get; set; }
 
-        [JsonProperty("requesterEmail")]
+        [JsonProperty("tracking.requesterEmail")]
         public string RequesterEmail { get; set; }
 
-        [JsonProperty("requesterPhone")]
+        [JsonProperty("tracking.requesterPhone")]
         public string RequesterPhone { get; set; }
 
-        [JsonProperty("deactivated")]
-        public bool Deactivated { get; set; }
-
-        /// <summary>
-        /// The date and time the certificate was last deactivated.  This is a read-only field and is returned only if deactivated&#x3D;true. 
-        /// </summary>
-        /// <value>The date and time the certificate was last deactivated.  This is a read-only field and is returned only if deactivated&#x3D;true. </value>
-        [JsonProperty("deactivatedOn")]
-        public DateTime? DeactivatedOn { get; set; }
+        [JsonProperty("tracking.additionalEmails")]
+        public string AdditionalEmails { get; set; }
     }
 
 
