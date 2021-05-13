@@ -15,6 +15,11 @@ namespace Keyfactor.AnyGateway.Entrust.Client
 
         public object RequestBody => JsonConvert.SerializeObject(this);
 
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this);
+        }
+
         public EntrustBaseRequest(string httpMethod)
         {
             if (String.IsNullOrEmpty(httpMethod))
@@ -37,7 +42,7 @@ namespace Keyfactor.AnyGateway.Entrust.Client
 
     }
 
-    public interface IApiRequest 
+    public interface IApiRequest
     {
         HttpMethod Method { get; set; }
         string Parameters { get; }

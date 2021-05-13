@@ -8,6 +8,11 @@ namespace Keyfactor.AnyGateway.Entrust.Client
 {
     public class EnrollResponse:EntrustBaseResponse
     {
+        public EnrollResponse():
+            base()
+        {
+
+        }
         public Api.Enrollment enrollment{ get; set; }
     }
 }

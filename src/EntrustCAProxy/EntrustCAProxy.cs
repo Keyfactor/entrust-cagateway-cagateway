@@ -48,8 +48,11 @@ namespace Keyfactor.AnyGateway.Entrust
                 Logger.Trace($"Current CAConnectionData:");
                 Logger.Trace($"{importedConfig}");
 
-                Config = JsonConvert.DeserializeObject<EntrustCAConfig>(JsonConvert.SerializeObject(configProvider.CAConnectionData));
+                Config = JsonConvert.DeserializeObject<EntrustCAConfig>(importedConfig);
                 ApiClient = new EntrustApiClient(Config.AuthenticationCertificate,Config.EntrustEndpoint);
+
+                var caDetail = Task.Run(async()=>await ApiClient.Request<CADetailRequest, CADetailResponse>(new CADetailRequest(Config.CAId))).Result;
+                Logger.Trace($"Initialized {caDetail.ca.Name} of type {caDetail.ca.properties.type} ({caDetail.ca.GetCAType()})");
             }
             catch (Exception ex)
             {
@@ -76,18 +79,53 @@ namespace Keyfactor.AnyGateway.Entrust
             Logger.MethodEntry(ILogExtensions.MethodLogLevel.Debug);
             try
             {
-                var profile = Task.Run(async () => await ApiClient.Request<ProfileResponse>(new ProfileRequest(Config.CAId, productInfo.ProductID))).Result;
-                EnrollRequest enrollRequest = new EnrollRequest(Config.CAId,csr,subject,profile);
-                var response = Task.Run(async () => await ApiClient.Request<EnrollResponse>(enrollRequest)).Result;
-                var cert = new X509Certificate2(Convert.FromBase64String(response.enrollment.body));
+                var caDetail = Task.Run(async () => await ApiClient.Request<CADetailRequest, CADetailResponse>(new CADetailRequest(Config.CAId))).Result;
+                var profile = Task.Run(async () => await ApiClient.Request<ProfileRequest, ProfileResponse>(new ProfileRequest(Config.CAId, productInfo.ProductID))).Result;
+                Logger.Trace($"Enroll for certificate with {profile.Profile.name}");
 
-                Logger.MethodExit(ILogExtensions.MethodLogLevel.Debug);
-                return new EnrollmentResult() { 
-                    CARequestID=cert.SerialNumber,
-                    Certificate = response.enrollment.body,
-                    StatusMessage = $"Successfully enrolled for certificate {cert.Subject}",
-                    Status = 20
-                };
+                EnrollRequest enrollRequest = new EnrollRequest(Config.CAId,csr,subject,profile);
+
+                if (caDetail.ca.GetCAType() == CAType.Public)
+                {
+                    //add tracking detail to properties
+                    enrollRequest.tracking.TrackingInfo = GetTrackingInfoValue("TrackingInfo", productInfo);
+                    enrollRequest.tracking.RequesterEmail = GetTrackingInfoValue("TrackingEmail", productInfo);
+                    enrollRequest.tracking.RequesterName = GetTrackingInfoValue("TrackingName", productInfo);
+                    enrollRequest.tracking.RequesterPhone = GetTrackingInfoValue("TrackingPhone", productInfo);
+                    enrollRequest.tracking.AdditionalEmails = GetTrackingInfoValue("TrackingAdditonalEmails", productInfo);
+                    //TODO: Support for custom tracking fields. Are these part of the custom fields in the profile?
+                    enrollRequest.properties = enrollRequest.GetTrackingDetailsForGateway();
+                }
+
+                Logger.Trace($"Execute request: {enrollRequest.Method} {enrollRequest.RequestUrl}");
+
+                var response = Task.Run(async () => await ApiClient.Request<EnrollRequest, EnrollResponse>(enrollRequest)).Result;
+                if (response.IsSuccess)
+                {
+                    var cert = new X509Certificate2(Convert.FromBase64String(response.enrollment.body));
+
+                    Logger.MethodExit(ILogExtensions.MethodLogLevel.Debug);
+                    return new EnrollmentResult()
+                    {
+                        CARequestID = cert.SerialNumber,
+                        Certificate = response.enrollment.body,
+                        StatusMessage = $"Successfully enrolled for certificate {cert.Subject}",
+                        Status = 20
+                    };
+
+                }
+                else 
+                {
+
+                    Logger.MethodExit(ILogExtensions.MethodLogLevel.Debug);
+                    return new EnrollmentResult()
+                    {
+                        StatusMessage = $"Failed to enroll for certificate {response.ErrorResponse.error.message}",
+                        Status = 30
+                    };
+                }
+
+
             }
             catch (EntrustApiException apiEx)
             {
@@ -113,6 +151,14 @@ namespace Keyfactor.AnyGateway.Entrust
             } 
         }
 
+        private string GetTrackingInfoValue(string trackingKey, EnrollmentProductInfo productInfo)
+        {
+            if (productInfo.ProductParameters.ContainsKey(trackingKey))
+                return productInfo.ProductParameters[Config.TrackingMap?.First(m => m.Key.Equals(trackingKey)).Value];
+
+            return string.Empty;
+        }
+
         /// <summary>
         /// Revoke a certificate via the Entrust CA Gateway API
         /// </summary>
@@ -132,7 +178,7 @@ namespace Keyfactor.AnyGateway.Entrust
             };
 
             RevokeRequest revokeRequest = new RevokeRequest(Config.CAId, hexSerialNumber, revokeAction);
-            var revokeResponse = Task.Run(async () => await ApiClient.Request<RevokeResponse>(revokeRequest)).Result;
+            var revokeResponse = Task.Run(async () => await ApiClient.Request<RevokeRequest, RevokeResponse>(revokeRequest)).Result;
 
             if (!revokeResponse.IsSuccess || 
                 revokeResponse.Action.status == Api.ActionStatus.REJECTED)
@@ -140,7 +186,7 @@ namespace Keyfactor.AnyGateway.Entrust
                 Logger.Error($"Unable to revoke certificate with SN:{hexSerialNumber}");
                 LogException(revokeResponse.ErrorResponse);
                 Logger.MethodExit(ILogExtensions.MethodLogLevel.Debug);
-                throw new EntrustApiException(revokeResponse.ErrorResponse);
+                throw new EntrustApiException(revokeResponse.ErrorResponse.error.message);
             }
 
             if (revokeResponse.Action.status == Api.ActionStatus.COMPLETED ||
@@ -164,7 +210,7 @@ namespace Keyfactor.AnyGateway.Entrust
         {
             Logger.MethodEntry(ILogExtensions.MethodLogLevel.Debug);
             CertificateRequest certificateRequest = new CertificateRequest(Config.CAId, caRequestID);
-            var certificateResponse = Task.Run(async () => await ApiClient.Request<CertificateResponse>(certificateRequest)).Result;
+            var certificateResponse = Task.Run(async () => await ApiClient.Request<CertificateRequest, CertificateResponse>(certificateRequest)).Result;
 
             if (certificateResponse.IsSuccess)
             {
@@ -187,7 +233,7 @@ namespace Keyfactor.AnyGateway.Entrust
                 Logger.Error($"Unable to retrieve details certificate SN:{caRequestID}");
                 LogException(certificateResponse.ErrorResponse);
                 Logger.MethodExit(ILogExtensions.MethodLogLevel.Debug);
-                throw new EntrustApiException(certificateResponse.ErrorResponse);
+                throw new EntrustApiException(certificateResponse.ErrorResponse.error.message);
             }
         }
 
@@ -208,6 +254,7 @@ namespace Keyfactor.AnyGateway.Entrust
 
             try
             {
+                Logger.Trace($"Request Synchronization Details CA:{syncRequest.CAId}. Event Start Date:{syncRequest.StartDate}");
                 Task.Run(async() => await GetCertificateEventsAsync(syncRequest,certsToSync,cancelToken));
 
                 foreach (var cert in certsToSync.GetConsumingEnumerable())  
@@ -244,22 +291,32 @@ namespace Keyfactor.AnyGateway.Entrust
                     }
 
                     listRequest.NextPageIndex = listResponse.nextPageIndex;
-                    listResponse = await ApiClient.Request<CertificateEventListResponse>(listRequest);
-                    ProcessCertificateEventResponse(listResponse.events, events, cancellationToken);
+                    Logger.Trace($"Execute Request: {listRequest.Method} {listRequest.RequestUrl}");
+                    listResponse = await ApiClient.Request<CertificateEventListRequest, CertificateEventListResponse>(listRequest);
+                    if (listResponse.IsSuccess && listResponse.events.Count > 0)
+                    {
+                        ProcessCertificateEventResponse(listResponse.events, events, cancellationToken);
+                    }
+
+                    if(!listResponse.IsSuccess)
+                    {
+                        Logger.Error($"Failed to execute Request: {listRequest.Method} {listRequest.RequestUrl}");
+                        Logger.Error($"Stopping synchronization. Message from Server: {listResponse.ErrorResponse?.error?.message}");
+                        events.CompleteAdding();
+                    }
 
                 } while (listResponse.morePages);
                 events.CompleteAdding();
-
             }
-            catch (EntrustApiException)
+            catch (EntrustApiException apiEx)
             {
+                Logger.Error($"API Exception in Sync: {apiEx.ApiMessage}");
                 events.CompleteAdding();
-                throw;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Logger.Error($"General Exception in Sync: {ex.Message}.");
                 events.CompleteAdding();
-                throw;
             }
         }
         private void ProcessCertificateEventResponse(List<CertificateEvent> responseEvents, BlockingCollection<CertificateEvent> events, CancellationToken cancellationToken)
@@ -280,7 +337,7 @@ namespace Keyfactor.AnyGateway.Entrust
         }
         private void LogException(ErrorResponse response)
         {
-            Logger.Error($"Error Code:{response.Message.code} | Description: {response.Message.message}");
+            Logger.Error($"Error Code:{response.error.code} | Description: {response.error.message}");
         }
         private string GetRevocationReason(uint revocationReason)
         {
@@ -338,7 +395,17 @@ namespace Keyfactor.AnyGateway.Entrust
         /// <param name="connectionInfo"></param>
         public override void ValidateCAConnectionInfo(Dictionary<string, object> connectionInfo)
         {
-            
+            Logger.MethodEntry(ILogExtensions.MethodLogLevel.Debug); 
+            string importedConfig = JsonConvert.SerializeObject(connectionInfo);
+            Logger.Trace($"Incoming CAConnectionData:");
+            Logger.Trace($"{importedConfig}");
+
+            Config = JsonConvert.DeserializeObject<EntrustCAConfig>(importedConfig);
+            ApiClient = new EntrustApiClient(Config.AuthenticationCertificate, Config.EntrustEndpoint);
+
+            var caDetail = ApiClient.Request<CADetailRequest, CADetailResponse>(new CADetailRequest(Config.CAId)).Result;
+            Logger.Trace($"Validated connectivity to {caDetail.ca.Name} of type {caDetail.ca.properties.type} ({caDetail.ca.GetCAType()})");
+            Logger.MethodExit(ILogExtensions.MethodLogLevel.Debug); 
         }
 
         /// <summary>
@@ -348,7 +415,28 @@ namespace Keyfactor.AnyGateway.Entrust
         /// <param name="connectionInfo">CAConnection section of the JSON config file</param>
         public override void ValidateProductInfo(EnrollmentProductInfo productInfo, Dictionary<string, object> connectionInfo)
         {
+            Logger.MethodEntry(ILogExtensions.MethodLogLevel.Debug);
+            string importedConfig = JsonConvert.SerializeObject(connectionInfo);
+
+            Config = JsonConvert.DeserializeObject<EntrustCAConfig>(importedConfig);
+            ApiClient = new EntrustApiClient(Config.AuthenticationCertificate, Config.EntrustEndpoint);
+
+            ProfileRequest profileRequest = new ProfileRequest(Config.CAId, productInfo.ProductID);
+
+            var profileDetail = ApiClient.Request<ProfileRequest, ProfileResponse>(profileRequest).Result;
+
+            if (profileDetail.IsSuccess)
+            {
+                Logger.Trace($"{profileDetail.Profile.name} successfully retrieved from CA Gateway");
+            }
+            else 
+            {
+                Logger.MethodExit(ILogExtensions.MethodLogLevel.Debug);
+                throw new EntrustApiException(profileDetail.ErrorResponse.error.message);
+            }
             
+            Logger.MethodExit(ILogExtensions.MethodLogLevel.Debug);
+
         }
     }
 }

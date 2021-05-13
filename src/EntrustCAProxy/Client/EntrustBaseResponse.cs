@@ -9,6 +9,10 @@ namespace Keyfactor.AnyGateway.Entrust.Client
 {
     public abstract class EntrustBaseResponse
     {
+        public EntrustBaseResponse()
+        {
+            ErrorResponse = new ErrorResponse();
+        }
         [JsonProperty("type")]
         public string Type { get; set; }
         [JsonProperty("message")]
