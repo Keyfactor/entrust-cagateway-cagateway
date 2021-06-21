@@ -6,7 +6,8 @@
 <!-- add integration specific information below -->
 *** 
 # Introduction
-Secitgo Certificate Manager (formerly COMODO) is a certificate management platform that allows for the issuance or private and public certificates. 
+The [Entrust CA Gateway](https://blog.entrust.com/2019/08/its-time-to-rest-easy/) is a RESTful API platform that allows for the issuance, synchronization, and management of CA certificates backed by Entrust's Manged SSL service, public CA offering, and Microsoft CAs.
+
 # Prerequisites
 
 ## Certificate Chain
@@ -19,7 +20,7 @@ In order to enroll for certificates the Keyfactor Command server must trust the 
 * Copy EntrustCAProxy.dll to the Program Files\Keyfactor\Keyfactor AnyGateway directory
 
 * Update the CAProxyServer.config file
-  * Update the CAConnection section to point at the SectigoCAProxyclass
+  * Update the CAConnection section to point at the EntrustCAProxy class
   ```xml
   <alias alias="CAConnector" type="Keyfactor.AnyGateway.Entrust.EntrustCAProxy, EntrustCAProxy"/>
   ```
@@ -147,6 +148,6 @@ There are no specific Changes for the GatewayRegistration section. Refer to the 
   "ServiceSettings": {
     "ViewIdleMinutes": 8,
     "FullScanPeriodHours": 24,
-	"PartialScanPeriodMinutes": 480 /*Note partial sync based on a timestamp is not supported by the Sectigo API. As a result all syncs with the API are treated as full syncronization jobs*/
+	"PartialScanPeriodMinutes": 480 
   }
 ```
