@@ -1,11 +1,4 @@
-﻿# Entrust CA Gateway
-## Ca-gateway
-
-This AnyGateway implementation consumes the Entrust CA Gateway API to provide access to the Entrust Certificate Services, Entrust Authority Security Manager, and Entrust Managed PKI product lines. 
-
-<!-- add integration specific information below -->
-*** 
-# Introduction
+﻿# Introduction
 The [Entrust CA Gateway](https://blog.entrust.com/2019/08/its-time-to-rest-easy/) is a RESTful API platform that allows for the issuance, synchronization, and management of CA certificates backed by Entrust's Manged SSL service, public CA offering, and Microsoft CAs.
 
 # Prerequisites
