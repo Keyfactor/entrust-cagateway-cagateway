@@ -45,7 +45,7 @@ The [Entrust CA Gateway](https://blog.entrust.com/2019/08/its-time-to-rest-easy/
 In order to enroll for certificates the Keyfactor Command server must trust the trust chain. Once you create your Root and/or Subordinate CA, make sure to import the certificate chain into the Command Server certificate store
 
 # Install
-* Download latest successful build from [GitHub Releases](/releases/latest)
+* Download latest successful build from [GitHub Releases](../../releases/latest)
 
 * Copy EntrustCAProxy.dll to the Program Files\Keyfactor\Keyfactor AnyGateway directory
 
