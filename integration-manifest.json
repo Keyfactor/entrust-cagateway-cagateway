@@ -2,6 +2,11 @@
   "$schema": "https://keyfactor.github.io/integration-manifest-schema.json",
   "integration_type": "ca-gateway",
   "name": "Entrust CA Gateway",
-  "status": "pilot",
-  "description": "This AnyGateway implementation consumes the Entrust CA Gateway API to provide access to the Entrust Certificate Services, Entrust Authority Security Manager, and Entrust Managed PKI product lines. "
+  "status": "prototype",
+  "support_level": "kf-supported",
+  "link_github": false,
+  "update_catalog": false,
+  "description": "This AnyGateway implementation consumes the Entrust CA Gateway API to provide access to the Entrust Certificate Services, Entrust Authority Security Manager, and Entrust Managed PKI product lines.",
+  "gateway_framework": "10.x.x",
+  "release_dir": "EntrustCAProxy/bin/Release"
 }
