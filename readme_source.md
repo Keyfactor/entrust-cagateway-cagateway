@@ -1,40 +1,3 @@
-
-# Entrust CA Gateway
-
-This AnyGateway implementation consumes the Entrust CA Gateway API to provide access to the Entrust Certificate Services, Entrust Authority Security Manager, and Entrust Managed PKI product lines.
-
-#### Integration status: Prototype - Demonstration quality. Not for use in customer environments.
-
-## About the Keyfactor AnyGateway CA Connector
-
-This repository contains an AnyGateway CA Connector, which is a plugin to the Keyfactor AnyGateway. AnyGateway CA Connectors allow Keyfactor Command to be used for inventory, issuance, and revocation of certificates from a third-party certificate authority.
-
-## Support for Entrust CA Gateway
-
-Entrust CA Gateway is supported by Keyfactor for Keyfactor customers. If you have a support issue, please open a support ticket via the Keyfactor Support Portal at https://support.keyfactor.com
-
-###### To report a problem or suggest a new feature, use the **[Issues](../../issues)** tab. If you want to contribute actual bug fixes or proposed enhancements, use the **[Pull requests](../../pulls)** tab.
-
----
-
-
----
-
-
-
-
-
-## Keyfactor AnyGateway Framework Supported
-
-This gateway was compiled against version 10.x.x of the AnyGateway Framework.  You will need at least this version of the AnyGateway Framework Installed.  If you have a later AnyGateway Framework Installed you will probably need to add binding redirects in the CAProxyServer.exe.config file to make things work properly.
-
-[Keyfactor CAGateway Install Guide](https://software.keyfactor.com/Guides/AnyGateway_Generic/Content/AnyGateway/Introduction.htm)
-
-
-
----
-
-
 ﻿# Introduction
 The [Entrust CA Gateway](https://blog.entrust.com/2019/08/its-time-to-rest-easy/) is a RESTful API platform that allows for the issuance, synchronization, and management of CA certificates backed by Entrust's Manged SSL service, public CA offering, and Microsoft CAs.
 
@@ -181,4 +144,3 @@ There are no specific Changes for the GatewayRegistration section. Refer to the 
 	"PartialScanPeriodMinutes": 480 
   }
 ```
-
