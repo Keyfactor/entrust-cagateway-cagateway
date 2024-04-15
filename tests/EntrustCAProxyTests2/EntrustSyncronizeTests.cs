@@ -66,7 +66,7 @@ namespace EntrustCAProxyTests
                 );
             CertificateRequest request = new CertificateRequest("CA-Jupiter", "5912bd91");
 
-            var result = await client.Request<CertificateResponse>(request);
+            var result = await client.Request<CertificateRequest, CertificateResponse>(request);
 
             mockWebRequestHandler.Protected().Verify(
                 "SendAsync",
@@ -113,7 +113,7 @@ namespace EntrustCAProxyTests
                     }
                 );
 
-            var result = await client.Request<RevokeResponse>(request);
+            var result = await client.Request<RevokeRequest, RevokeResponse>(request);
 
             mockWebRequestHandler.Protected().Verify(
                 "SendAsync",
@@ -170,7 +170,7 @@ namespace EntrustCAProxyTests
                 });
 
 
-            var result = await client.Request<RevokeResponse>(mockRequest.Object);//Should throw an Arugment exception
+            var result = await client.Request<RevokeRequest, RevokeResponse>(mockRequest.Object);//Should throw an Arugment exception
 
             Assert.Fail();
 
