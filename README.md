@@ -1,5 +1,9 @@
 
-# Entrust CA Gateway
+# Entrust CA Gateway (DEPRECATED)
+
+> [!IMPORTANT]
+> Entrust Certificate Services are being discontinued by Entrust on September 8, 2025. On September 8th, this gateway
+> plugin will be archived and no longer supported.
 
 This AnyGateway implementation consumes the Entrust CA Gateway API to provide access to the Entrust Certificate Services, Entrust Authority Security Manager, and Entrust Managed PKI product lines.
 
@@ -10,6 +14,10 @@ This AnyGateway implementation consumes the Entrust CA Gateway API to provide ac
 This repository contains an AnyCA Gateway Connector, which is a plugin to the Keyfactor AnyGateway. AnyCA Gateway Connectors allow Keyfactor Command to be used for inventory, issuance, and revocation of certificates from a third-party certificate authority.
 
 ## Support for Entrust CA Gateway
+
+> [!WARNING]
+> Entrust Certificate Services are being discontinued by Entrust on September 8, 2025. On September 8th, this gateway
+> plugin will be archived and no longer supported.
 
 Entrust CA Gateway is supported by Keyfactor for Keyfactor customers. If you have a support issue, please open a support ticket via the Keyfactor Support Portal at https://support.keyfactor.com
 
