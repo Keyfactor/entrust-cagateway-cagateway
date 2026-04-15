@@ -1,9 +1,5 @@
 
-# Entrust CA Gateway (DEPRECATED)
-
-> [!IMPORTANT]
-> Entrust Certificate Services are being discontinued by Entrust on September 8, 2025. On September 8th, this gateway
-> plugin will be archived and no longer supported.
+# Entrust CA Gateway
 
 This AnyGateway implementation consumes the Entrust CA Gateway API to provide access to the Entrust Certificate Services, Entrust Authority Security Manager, and Entrust Managed PKI product lines.
 
