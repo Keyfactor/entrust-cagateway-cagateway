@@ -11,10 +11,6 @@ This repository contains an AnyCA Gateway Connector, which is a plugin to the Ke
 
 ## Support for Entrust CA Gateway
 
-> [!WARNING]
-> Entrust Certificate Services are being discontinued by Entrust on September 8, 2025. On September 8th, this gateway
-> plugin will be archived and no longer supported.
-
 Entrust CA Gateway is supported by Keyfactor for Keyfactor customers. If you have a support issue, please open a support ticket via the Keyfactor Support Portal at https://support.keyfactor.com
 
 ###### To report a problem or suggest a new feature, use the **[Issues](../../issues)** tab. If you want to contribute actual bug fixes or proposed enhancements, use the **[Pull requests](../../pulls)** tab.
